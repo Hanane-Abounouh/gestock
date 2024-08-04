@@ -17,10 +17,10 @@ class CategoryController extends Controller
         try {
             // Récupère toutes les catégories de la base de données
             $categories = Category::all();
-            // Retourne une réponse JSON contenant toutes les catégories avec un code de succès 200
+           
             return response()->json($categories, 200);
         } catch (\Exception $e) {
-            // En cas d'erreur, retourne une réponse JSON avec un message d'erreur et un code 500
+          
             return response()->json(['message' => 'Une erreur est survenue lors de la récupération des catégories.'], 500);
         }
     }

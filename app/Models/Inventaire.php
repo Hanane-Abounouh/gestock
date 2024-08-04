@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,6 +12,9 @@ class Inventaire extends Model
     protected $fillable = [
         'produit_id',
         'quantite',
+        'location',
+        'capacity',
+        'currentStock',
     ];
 
     public function produit()

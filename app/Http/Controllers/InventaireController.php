@@ -3,93 +3,80 @@ namespace App\Http\Controllers;
 
 use App\Models\Inventaire;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class InventaireController extends Controller
 {
-    /**
-     * Affiche la liste de tous les inventaires avec les relations produit.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function index()
     {
-        $inventaires = Inventaire::with('produit')->get();
-        return response()->json([
-            'message' => 'Liste de tous les inventaires récupérée avec succès.',
-            'data' => $inventaires
-        ], 200);
+        try {
+            $inventaires = Inventaire::with('produit')->get();
+            return response()->json(['message' => 'Inventaires récupérés avec succès', 'data' => $inventaires], 200);
+        } catch (\Exception $e) {
+            Log::error('Erreur lors de la récupération des inventaires: ' . $e->getMessage());
+            return response()->json(['message' => 'Erreur lors de la récupération des inventaires'], 500);
+        }
     }
 
-    /**
-     * Crée un nouvel inventaire.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'produit_id' => 'required|exists:produits,id',
             'quantite' => 'required|integer',
+            'location' => 'required|string|max:255',
+            'capacity' => 'required|integer',
+            'currentStock' => 'required|integer',
         ]);
 
-        $inventaire = Inventaire::create($validated);
-
-        return response()->json([
-            'message' => 'Inventaire créé avec succès.',
-            'data' => $inventaire
-        ], 201);
+        try {
+            $inventaire = Inventaire::create($request->all());
+            return response()->json(['message' => 'Inventaire créé avec succès', 'data' => $inventaire], 201);
+        } catch (\Exception $e) {
+            Log::error('Erreur lors de la création de l\'inventaire: ' . $e->getMessage());
+            return response()->json(['message' => 'Erreur lors de la création de l\'inventaire'], 500);
+        }
     }
 
-    /**
-     * Affiche les détails d'un inventaire spécifique avec la relation produit.
-     *
-     * @param \App\Models\Inventaire $inventaire
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function show(Inventaire $inventaire)
+    public function show($id)
     {
-        $inventaire->load('produit');
-        return response()->json([
-            'message' => 'Détails de l\'inventaire récupérés avec succès.',
-            'data' => $inventaire
-        ], 200);
+        try {
+            $inventaire = Inventaire::with('produit')->findOrFail($id);
+            return response()->json(['message' => 'Inventaire récupéré avec succès', 'data' => $inventaire], 200);
+        } catch (\Exception $e) {
+            Log::error('Erreur lors de la récupération de l\'inventaire: ' . $e->getMessage());
+            return response()->json(['message' => 'Inventaire non trouvé'], 404);
+        }
     }
 
-    /**
-     * Met à jour les informations d'un inventaire spécifique.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\Inventaire $inventaire
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function update(Request $request, Inventaire $inventaire)
+    public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'produit_id' => 'sometimes|exists:produits,id',
-            'quantite' => 'sometimes|integer',
+        $request->validate([
+            'produit_id' => 'exists:produits,id',
+            'quantite' => 'integer',
+            'location' => 'string|max:255',
+            'capacity' => 'integer',
+            'currentStock' => 'integer',
         ]);
 
-        $inventaire->update($validated);
-
-        return response()->json([
-            'message' => 'Inventaire mis à jour avec succès.',
-            'data' => $inventaire
-        ], 200);
+        try {
+            $inventaire = Inventaire::findOrFail($id);
+            $inventaire->update($request->all());
+            return response()->json(['message' => 'Inventaire mis à jour avec succès', 'data' => $inventaire], 200);
+        } catch (\Exception $e) {
+            Log::error('Erreur lors de la mise à jour de l\'inventaire: ' . $e->getMessage());
+            return response()->json(['message' => 'Erreur lors de la mise à jour de l\'inventaire'], 500);
+        }
     }
 
-    /**
-     * Supprime un inventaire spécifique.
-     *
-     * @param \App\Models\Inventaire $inventaire
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function destroy(Inventaire $inventaire)
+    public function destroy($id)
     {
-        $inventaire->delete();
-
-        return response()->json([
-            'message' => 'Inventaire supprimé avec succès.'
-        ], 204); // Changer à 204 si vous ne voulez pas inclure un corps dans la réponse
+        try {
+            $inventaire = Inventaire::findOrFail($id);
+            $inventaire->delete();
+            return response()->json(['message' => 'Inventaire supprimé avec succès'], 204);
+        } catch (\Exception $e) {
+            Log::error('Erreur lors de la suppression de l\'inventaire: ' . $e->getMessage());
+            return response()->json(['message' => 'Erreur lors de la suppression de l\'inventaire'], 500);
+        }
     }
 }
