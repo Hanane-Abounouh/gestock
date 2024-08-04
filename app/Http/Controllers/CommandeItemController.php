@@ -3,13 +3,21 @@ namespace App\Http\Controllers;
 
 use App\Models\CommandeItem;
 use Illuminate\Http\Request;
+use Exception;
 
 class CommandeItemController extends Controller
 {
     public function index()
     {
-        $commandeItems = CommandeItem::with('commande', 'produit')->get();
-        return view('commande_items.index', compact('commandeItems'));
+        try {
+            $commandeItems = CommandeItem::with('commande', 'produit')->get();
+            return response()->json([
+                'message' => 'Liste de tous les éléments de commande récupérée avec succès.',
+                'data' => $commandeItems
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function create()
@@ -19,20 +27,35 @@ class CommandeItemController extends Controller
 
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'commande_id' => 'required|exists:commandes,id',
-            'produit_id' => 'required|exists:produits,id',
-            'quantite' => 'required|integer',
-            'prix' => 'required|numeric',
-        ]);
+        try {
+            $validatedData = $request->validate([
+                'commande_id' => 'required|exists:commandes,id',
+                'produit_id' => 'required|exists:produits,id',
+                'quantite' => 'required|integer',
+                'prix' => 'required|numeric',
+            ]);
 
-        CommandeItem::create($validatedData);
-        return redirect()->route('commande_items.index')->with('success', 'Élément de commande créé avec succès.');
+            $commandeItem = CommandeItem::create($validatedData);
+            return response()->json([
+                'message' => 'Élément de commande créé avec succès.',
+                'data' => $commandeItem
+            ], 201);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function show(CommandeItem $commandeItem)
     {
-        return view('commande_items.show', compact('commandeItem'));
+        try {
+            $commandeItem->load('commande', 'produit');
+            return response()->json([
+                'message' => 'Détails de l\'élément de commande récupérés avec succès.',
+                'data' => $commandeItem
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function edit(CommandeItem $commandeItem)
@@ -42,20 +65,33 @@ class CommandeItemController extends Controller
 
     public function update(Request $request, CommandeItem $commandeItem)
     {
-        $validatedData = $request->validate([
-            'commande_id' => 'required|exists:commandes,id',
-            'produit_id' => 'required|exists:produits,id',
-            'quantite' => 'required|integer',
-            'prix' => 'required|numeric',
-        ]);
+        try {
+            $validatedData = $request->validate([
+                'commande_id' => 'required|exists:commandes,id',
+                'produit_id' => 'required|exists:produits,id',
+                'quantite' => 'required|integer',
+                'prix' => 'required|numeric',
+            ]);
 
-        $commandeItem->update($validatedData);
-        return redirect()->route('commande_items.index')->with('success', 'Élément de commande mis à jour avec succès.');
+            $commandeItem->update($validatedData);
+            return response()->json([
+                'message' => 'Élément de commande mis à jour avec succès.',
+                'data' => $commandeItem
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function destroy(CommandeItem $commandeItem)
     {
-        $commandeItem->delete();
-        return redirect()->route('commande_items.index')->with('success', 'Élément de commande supprimé avec succès.');
+        try {
+            $commandeItem->delete();
+            return response()->json([
+                'message' => 'Élément de commande supprimé avec succès.'
+            ], 200); // Changer à 204 si vous ne voulez pas inclure un corps dans la réponse
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

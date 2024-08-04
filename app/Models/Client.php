@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,7 +15,6 @@ class Client extends Model
         'adresse',
     ];
 
-    // Define relationships if needed
     public function commandes()
     {
         return $this->hasMany(Commande::class);
