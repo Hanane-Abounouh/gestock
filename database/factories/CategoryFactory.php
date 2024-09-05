@@ -2,20 +2,19 @@
 
 namespace Database\Factories;
 
-use App\Models\Client;
+use App\Models\Category;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ClientFactory extends Factory
+class CategoryFactory extends Factory
 {
-    protected $model = Client::class;
+    protected $model = Category::class;
 
     public function definition()
     {
         return [
-            'nom' => $this->faker->name,
-            'email' => $this->faker->unique()->safeEmail,
-            'telephone' => $this->faker->phoneNumber,
-            'adresse' => $this->faker->address,
+            'name' => $this->faker->word,
+            'description' => $this->faker->sentence,
+            'user_id' => User::factory(), // Ensures user_id is valid
         ];
     }
 }

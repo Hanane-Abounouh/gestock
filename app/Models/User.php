@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,8 +14,15 @@ class User extends Authenticatable
 
     protected $hidden = ['password'];
 
+    // Relation entre User et Role
     public function role()
     {
         return $this->belongsTo(Role::class);
+    }
+
+    // Relation entre User et Category
+    public function categories()
+    {
+        return $this->hasMany(Category::class, 'user_id');
     }
 }

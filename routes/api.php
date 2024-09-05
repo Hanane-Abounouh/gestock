@@ -9,6 +9,10 @@ use App\Http\Controllers\CommandeItemController;
 use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\InventaireController;
 use App\Http\Controllers\ProduitController;
+use App\Http\Controllers\UserController;
+
+Route::apiResource('users', UserController::class);
+
 
 // Auth routes
 Route::post('register', [AuthController::class, 'register']);
